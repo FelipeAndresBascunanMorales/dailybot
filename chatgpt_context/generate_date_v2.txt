@@ -1,0 +1,599 @@
+Your work is to generate the lines of code that correspond to each element in the requirement received in the JSON file.
+Here are the three entities that have the attributes that you have to use (Empresa, variable, linea_contable) btw prefer the methods in the helper when is posible.
+
+
+Your response must be a piece of Ruby code. If the data must be grouped (agrupada) Your response must be an hash and a array using the keys of that hash, if not, we only need the hash
+
+LineaContable
+{
+    :rut => :ci,
+    :person_id => :integer,
+    :employee_id => :string,
+    :employee_code => :string,
+    :employee => :string,
+    :nombre => :string,
+    :last_name => :string,
+    :first_name => :string,
+    :second_last_name => :string,
+    :division_name => :string,
+    :area_full_name => :string,
+    :area_centro_costo => :string,
+    :department_name => :string,
+    :cuenta_contable => :string,
+    :deber => :integer,
+    :haber => :integer,
+    :centro_costo => :string,
+    :centro_costo_weight => :string,
+    :glosa => :string,
+    :deber_o_haber => :string,
+    :mostrar_icr => :string,
+    :tipo_doc => :string,
+    :nombre_cuenta => :string,
+    :tipo_cuenta => :string,
+    :formato => :string,
+    :employee_custom_attrs => :string,
+    :job_custom_attrs => :string,
+    :role_custom_attrs => :string,
+    :area_custom_attrs => :string,
+    :cuenta_custom_attrs => :string,
+    :centro_costo_custom_attrs => :string,
+    :division_custom_attrs => :string,
+    :division_id => :string,
+    :role_name => :string,
+    :role_code => :string,
+    :rol_privado => :string,
+    :dias_trabajados => :string,
+    :costo_empresa => :string,
+    :estado => :string,
+    :description => :string,
+    :item_code => :string,
+    :receptor => :string,
+    :tipo_contrato => :string,
+    :job => :job,
+    # Informacion de receptor de pago,
+    :rut_recipient => :ci,
+    :first_name_recipient => :string,
+    :last_name_recipient => :string,
+    :email_recipient => :string,
+    :payment_method_recipient => :string,
+    :bank_recipient => :string,
+    :account_type_recipient => :string,
+    :account_number_recipient => :string,
+    # La liquidacion o el finiquito que generó esta linea,
+    :origin => :liquidartion,
+    :area_name => :string,
+    :afp => :string,
+    :isapre => :string,
+    :afp_recaudadora => :string,
+    :apvc => :string,
+    :rut_afp => :string,
+    :rut_isapre => :string,
+    :rut_apv => :string,
+    :regimen_apv => :string,
+    :institucion_apv => :string,
+    :is_cuenta2 => :string,
+    :compania_cuenta2 => :string,
+    :rut_cuenta2 => :string,
+    :rut_afp_recaudadora => :string,
+    # Los que siguen se usan para el base de Prov. Vacaciones.,
+    :dias_inicial => :integer,
+    :dias_final => :integer,
+    :valor_inicial => :integer,
+    :dias_diferencia => :integer,
+    :valor_diferencia => :integer,
+    :valor_final => :integer,
+    # Los que siguen se usan para el base de tratos,
+    # @return [Piecework::Worklog],
+    :tratos => :string,
+    :line_code => :string,
+    :union_rut => :string
+}
+
+
+    Empresa
+{
+    :id => :integer,
+    :actividad_economica => :integer,
+    :ciudad => :string,
+    :codigo_convenio_xdata => :string,
+    :codigo_empresa => :string,
+    :codigo_empresa_2 => :string,
+    :codigo_postal => :string,
+    :comuna => :string,
+    :comuna_imed => :string,
+    :considerar_horas_extra_gratificaciones => :boolean,
+    :constitution_date_colombia => :date,
+    :contabilidad => :integer,
+    :created_at => :datetime,
+    :direccion => :string,
+    :fantasy_name => :string,
+    :giro => :string,
+    :gratificacion_sin_tope => :boolean,
+    :imed_licence_type_id => :integer,
+    :imed_password => :string,
+    :limit_realms => :boolean,
+    :logo_url => :string,
+    :lucro => :boolean,
+    :modulo_vacaciones => :boolean,
+    :nom_bd_softland => :string,
+    :nombre => :text,
+    :plazo_vencimiento_extras => :integer,
+    :plazo_vencimiento_legales => :integer,
+    :plazo_vencimiento_progresivas => :integer,
+    :proporcionar_tope_gratificaciones => :boolean,
+    :recargo_domingo_en_gratificacion => :boolean,
+    :regimen => :integer,
+    :region => :citext,
+    :registro_patronal_mexico => :string,
+    :reporte_ine_url => :string,
+    :retencion_fuente_colombia => :integer,
+    :rut => :text,
+    :tope_gratificacion_multiples_fichas => :boolean,
+    :type => :string,
+    :updated_at => :datetime,
+    :vencer_vacaciones => :boolean,
+    :email_empresa => :string,
+    :emitir_pago_utilidades_anuales_peru => :boolean,
+    :location_id => :integer,
+    :codigo_servicio_sector_publico => :integer,
+    :servicio_sector_publico => :string,
+    :codigo_dependencia_sector_publico => :integer,
+    :dependencia_sector_publico => :string,
+    :address_type => :integer,
+    :address_number => :citext,
+    :address_reference => :citext,
+    :address_neighborhood => :citext,
+    :medipass_password => :string,
+    :tax_classification => :integer,
+    :electronic_record => :boolean,
+    :payroll_dismissal => :boolean,
+    :anio_acogida_40_horas => :integer
+}
+
+  Variable
+
+{
+    :id => :integer,
+    :aportes_patronales_url => :string,
+    :banco_url => :string,
+    :contabilidad_finiquitos_url => :string,
+    :contabilidad_url => :string,
+    :created_at => :datetime,
+    :estado => :integer,
+    :fecha_archivos => :datetime,
+    :fecha_envio_liquidaciones => :datetime,
+    :legacy_files => :boolean,
+    :leyes_sociales_url => :string,
+    :libro_descuentos_url => :string,
+    :libro_remuneraciones_completo_url => :string,
+    :libro_remuneraciones_url => :string,
+    :monthly_variable_id => :integer,
+    :pdf_url => :string,
+    :previred_url => :string,
+    :updated_at => :datetime,
+    :period_type => :integer,
+    :period_number => :integer,
+    :end_date => :date,
+    :start_date => :date,
+    :paid => :boolean
+}
+
+HelperMethods
+[
+    :cuenta2_entidad,
+    :rut_sin_dv_ni_puntos,
+    :search_rut,
+    :rut_mutual,
+    :rut_ccaf,
+    :search_nombre_entidad,
+    :nombre_mutual,
+    :nombre_ccaf,
+    :search_glosa,
+    :search_cenco,
+    :get_centro_costo,
+    :get_nombre_empleado,
+    :show_centro_costo,
+    :search_account_company,
+    :search_cenco_h_d,
+    :search_concepto,
+    :search_cenco_cuenta,
+    :search_account_job,
+    :search_rut_empleado,
+    :get_nombre_completo_empleado,
+    :search_plan_contable,
+    :get_cuenta_by_plan_contable_dinamico,
+    :rut_afp_recaudadora_cesantia,
+    :tabla
+]
+
+EXAMPLE of prompt:
+
+{
+  "Detalle de centralización":
+    {
+      "Cabecera": 
+      [
+        "EXTERNAL ID",
+        "ID SUBSIDIARIA",
+        "FECHA"
+      ],
+      "Cuerpo": 
+      [
+        {
+          "Nombre Campo": "EXTERNAL ID", 
+          "Tipo": "Texto",
+          "Referencia atributo": "En duro",
+          "Largo (txt o csv)": "",
+          "Atributo personalizado": "",
+          "Formato requerido": "",
+          "Ejemplo": "NOM_NOV_2024",
+          "Detalle": "En el campo del cuerpo, debe imprimir la palabra NOM_MES LAS 3 PRIMERA LETRAS DE CADA MES_AÑO, Ejemplo NOM_ENE_2024, por cada registro"
+        },
+        {
+          "Nombre Campo": "ID SUBSIDIARIA", 
+          "Tipo": "Texto",
+          "Referencia atributo": "Personalizado",
+          "Largo (txt o csv)": "",
+          "Atributo personalizado": "ID SUBSIDIARIA",
+          "Formato requerido": "",
+          "Ejemplo": "4",
+          "Detalle": "El campo en el cuerpo debe imprimir en cada registo lo que contegan el atributo personalizado creado en empresa llamado ID SUBSIDIARIA"
+        },
+        {
+          "Nombre Campo": "FECHA", 
+          "Tipo": "Fecha",
+          "Referencia atributo": "Por defecto",
+          "Largo (txt o csv)": "",
+          "Atributo personalizado": "",
+          "Formato requerido": "",
+          "Ejemplo": "1/31/2024",
+          "Detalle": "El campo en el cuerpo debe imprimir siempre la ultima fecha de cada mes en formato DIA/MES/AÑO Ejemplo: 31/01/2024, por cada registro"
+        }
+      ]
+    }
+}
+
+
+EXAMPLE OF YOUR RESPONSE:
+
+
+```
+date_b_y = I18n.l(variable.start_date, format: "%B_%Y").upcase 
+id_subsidiaria = empresa.custom_attrs['ID SUBSIDIARIA']
+{
+  external_id: "NOM_#{date_b_y}",
+  id_subsidiaria: id_subsidiaria,
+  fecha: variable.end_date.strftime('%d%m%Y'),
+}
+
+[
+  k[:external_id],
+  k[:id_subsidiaria],
+  k[:fecha],
+]
+
+```
+
+OTHER EXAMPLES OF FORMATTED RESPONSES YOU SHOULD RETURN
+```
+
+{
+  cuenta_contable: search_account(obj),
+  centro_costo: I18n.transliterate(obj.centro_costo || "").first(4),
+  deber_o_haber: obj.deber_o_haber,
+  glosa: I18n.transliterate(obj.glosa || "").ljust(35, ' ')&.first(35),
+}
+
+[
+  k[:cuenta_contable],
+  k[:centro_costo],
+  k[:deber_o_haber],
+  k[:glosa],
+]
+
+```
+
+```
+
+{
+  gb_bp: l.cuenta_custom_attrs&.dig("GB/BP"),
+  account: get_account(l),
+  unidad: l.job_custom_attrs&.dig("Unidad"),
+  area: l.job_custom_attrs&.dig("Area"),
+  proyecto: l.job_custom_attrs&.dig("Equipo"),
+  cencos: get_centro_costo(l),
+  descripcion_cuenta: l.cuenta_custom_attrs&.dig("Descripcion cuenta mayor"),
+  deber_o_haber: l.deber_o_haber,
+}
+
+[
+  k[:gb_bp],
+  k[:account],
+  k[:unidad],
+  k[:area],
+  k[:proyecto],
+  k[:cencos],
+  k[:descripcion_cuenta],
+  k[:deber_o_haber],
+]
+```
+
+
+AND FOR REFERENCE
+
+the helper methods detailed
+
+```
+# Servicio para generar lineas contables relacionada a informativos desde las liquidaciones
+module HelperContabilidad
+  def search_rut object, empresa, variable, name_attrs = "Rut"
+    case object.cuenta_custom_attrs&.dig(name_attrs)&.to_s&.upcase&.squish
+    when 'AFP'
+      if object.origin.is_a?(Finiquito)
+        object.rut_afp
+      elsif object.nombre_cuenta == "apv"
+        object.rut_apv
+      elsif object.nombre_cuenta == "cuenta_2"
+        object.rut_cuenta2
+      elsif ["cesantia", "cesantia_empleador_deber", "cesantia_empleador_haber", "reliquidacion_cesantia", "reliquidacion_cesantia_empleador_deber", "reliquidacion_cesantia_empleador_haber"].include?(object.nombre_cuenta)
+        object.rut_afp_recaudadora
+      end || object.rut_afp
+    when 'SALUD'
+      object.rut_isapre
+    when 'MUTUAL'
+      rut_mutual(variable, empresa)
+    when 'CCAF'
+      rut_ccaf(variable, empresa)
+    when 'FUNCIONARIO'
+      object.rut&.humanize
+    when "APV"
+      object.rut_apv
+    when "AFC"
+      object.rut_afp
+    when 'EMPRESA'
+      empresa.rut&.humanize
+    when 'SINDICATO'
+      object.union_rut&.humanize
+    when 'BENEFICIARIO' || "SEGUROS"
+      object.rut_recipient&.humanize
+    when "BANCO"
+      empresa.custom_attrs&.dig("Rut Banco")
+    else
+      object.cuenta_custom_attrs&.dig(name_attrs)
+    end
+  end
+
+  def search_nombre_entidad object, empresa, variable, nombre_atributo
+    case object.cuenta_custom_attrs&.dig(nombre_atributo)&.upcase
+    when 'AFP'
+      if object.origin.is_a?(Finiquito)
+        object.afp
+      elsif object.nombre_cuenta == "cuenta_2"
+        object.compania_cuenta2
+      elsif ["cesantia", "cesantia_empleador_deber", "cesantia_empleador_haber", "reliquidacion_cesantia", "reliquidacion_cesantia_empleador_deber", "reliquidacion_cesantia_empleador_haber"].include?(object.nombre_cuenta)
+        object.afp_recaudadora
+      end || object.afp
+    when "APVC"
+      object.apvc
+    when 'SALUD'
+      object.isapre
+    when 'FUNCIONARIO'
+      "#{object.last_name} #{object.second_last_name} #{object.first_name}"
+    when 'EMPRESA'
+      empresa.nombre
+    when 'MUTUAL'
+      nombre_mutual(variable, empresa)
+    when 'CCAF'
+      nombre_ccaf(variable, empresa)
+    else
+      object.cuenta_custom_attrs&.dig(nombre_atributo)
+    end.to_s
+  end
+
+  def search_glosa object
+    object.cuenta_custom_attrs&.dig("Glosa").presence || object.glosa
+  end
+
+  def search_cenco object
+    object.cuenta_custom_attrs&.dig("Centro Costo")&.parameterize == "si" ? object.centro_costo : nil
+  end
+
+  def get_centro_costo object
+    object.cuenta_custom_attrs&.dig('Agrupador')&.parameterize == "cencos" ? object.centro_costo : nil
+  end
+
+  def get_nombre_empleado object
+    object.cuenta_custom_attrs&.dig("Nombre trabajador")&.parameterize == "si" ? object.employee.apellidos_nombre : nil
+  end
+
+  def show_centro_costo object
+    object.cuenta_custom_attrs&.dig("Agrupador") == 'Totalizado' ? nil : object.centro_costo
+  end
+
+  def search_account_company object, empresa
+    object.cuenta_custom_attrs&.dig(empresa.nombre).presence || object.cuenta_contable
+  end
+
+  def search_cenco_h_d object, deber_o_haber
+    return object.centro_costo if object.cuenta_custom_attrs&.dig("Agrupador")&.parameterize == "cencos" || object.deber_o_haber == deber_o_haber
+  end
+
+  def search_concepto object
+    return object.glosa if object.cuenta_custom_attrs&.dig("Agrupador")&.parameterize == "concepto"
+    object.cuenta_custom_attrs&.dig("Nombre cuenta Contable")
+  end
+
+  def search_cenco_cuenta object
+    object.cuenta_custom_attrs&.dig("Cuenta #{object.centro_costo_custom_attrs&.dig("Tipo")}").presence || object.cuenta_contable
+  end
+
+  def search_account_job object
+    object.cuenta_custom_attrs&.dig(object.job_custom_attrs&.dig("Tipo Trabajador")).presence || object.cuenta_contable
+  end
+
+  def search_rut_empleado obj
+    obj.cuenta_custom_attrs&.dig("Agrupador") == "Concepto" ? obj.rut : nil
+  end
+
+  def get_nombre_completo_empleado object
+    object.cuenta_custom_attrs&.dig("Agrupador") == "Concepto" ? object.employee.apellidos_nombre : nil
+  end
+
+  def search_plan_contable l, empresa
+    l.cuenta_custom_attrs&.dig(empresa.nombre).presence || l.cuenta_contable
+  end
+
+  def get_cuenta_by_plan_contable_dinamico(obj, atributo)
+    plan_contable = obj.send("#{atributo}_custom_attrs")&.dig("Plan Contable").to_s
+    return obj.cuenta_contable unless plan_contable.present?
+    obj.cuenta_custom_attrs&.dig(plan_contable)
+  end
+
+  def rut_afp_recaudadora_cesantia
+    @rut_afp_recaudadora_cesantia ||= Plan::Chile::RUTS_AFP.transform_keys{ |k| "recauda_#{k}".to_sym }.freeze
+  end
+  def rut_mutual variable, empresa
+    @rut_mutual ||= Hash.new do |h, empresa_arg|
+      h[empresa_arg] = empresa_arg.variable_empresas&.del_mes(variable.start_date)&.last&.seguro_accidente_rut_print
+    end
+    @rut_mutual[empresa]
+  end
+
+  def nombre_mutual variable, empresa
+    @nombre_mutual ||= Hash.new do |h, empresa_arg|
+      h[empresa_arg] = empresa_arg.variable_empresas&.del_mes(variable.start_date)&.last&.seguro_accidente&.capitalize
+    end
+    @nombre_mutual[empresa]
+  end
+
+  def rut_ccaf variable, empresa
+    @rut_ccaf ||= Hash.new do |h, empresa_arg|
+      h[empresa_arg] = empresa_arg.variable_empresas&.del_mes(variable.start_date)&.last&.caja_rut_print
+    end
+    @rut_ccaf[empresa]
+  end
+
+  def nombre_ccaf variable, empresa
+    @nombre_ccaf ||= Hash.new do |h, empresa_arg|
+      h[empresa_arg] = empresa_arg.variable_empresas&.del_mes(variable.start_date)&.last&.caja&.tr("_", " ")&.capitalize
+    end
+    @nombre_ccaf[empresa]
+  end
+
+
+    # Separación de cuentas 2 por entidad. Se necesita que cada institución de cuentas 2 tenga una cuenta contable con la
+  # siguiente estructura "cuenta2_nombredelainstitucion(snakecase)". Revisar app/models/plan/chile.rb para sacar el nombre exacto de la entidad.
+  # Al ocupar este método el obj_contabilidad de la centralizacion tiene que discriminar o eliminar las cuentas_2 que vienen por defecto (
+  # ej: obj_contabilidad.reject{|obj| obj.nombre_cuenta == 'cuenta_2'}.
+  def cuenta2_entidad obj_contabilidad
+    cuentas_2 = obj_contabilidad.select(&:is_cuenta2)
+    arr = []
+    cuentas_2.each do |cuenta_2|
+      linea_liquidacions = cuenta_2.origin.linea_liquidacions.select{|ll| ll.codigo.include?('cuenta2')}
+      linea_liquidacions.each do |ll|
+        next if ll.monto == 0
+        # Modelo Plan trae atributo para cuentas 2 con termino "_compania"
+        # el que trae un string que se compone de la siguiente forma: "cuenta2_nombredelainstitucion"
+        nombre_cuenta = cuenta_2.origin&.plan.send("#{ll.codigo}_compania")
+        cuenta_contable = CuentaContable.find_by(nombre: nombre_cuenta)
+        next if cuenta_contable.nil?
+        obj_cuenta2 = cuenta_2.dup
+        obj_cuenta2.nombre_cuenta = nombre_cuenta
+        obj_cuenta2.cuenta_custom_attrs = cuenta_contable.custom_attrs.presence
+        obj_cuenta2.cuenta_contable = cuenta_contable.numero
+        arr << obj_cuenta2
+      end
+    end
+    arr
+  end
+
+  def tabla variable
+    @tabla ||= Hash.new do |h, key|
+      h[key] = CalculosBono::ParameterTableLookup.new(key)
+    end
+    @tabla[variable]
+  end
+
+  def rut_sin_dv_ni_puntos(rut)
+    return unless rut.present?
+    rut.to_s.tr(".-", "")[0...-1]
+  end
+end
+
+```
+
+the asignation of the linea_contable
+
+```
+linea_contable = LineaContable.new(
+          rut: @employee.rut,
+          person_id: @employee.person_id,
+          employee_id: @employee.id,
+          employee_code: @employee.code,
+          employee: @employee,
+          last_name: @employee.last_name,
+          first_name: @employee.first_name,
+          second_last_name: @employee.segundo_apellido,
+          area_full_name: @job.cached_area&.full_name,
+          division_id: @job.cached_area&.department&.cached_division&.id,
+          division_name: @job.cached_area&.department&.cached_division&.name,
+          department_name: @job.cached_area&.department&.name,
+          role_name: @job.role&.name,
+          role_code: @job.role&.code,
+          employee_custom_attrs: @employee.custom_attrs.as_hash,
+          job_custom_attrs: @job.custom_attrs&.as_hash,
+          role_custom_attrs: @job.role&.custom_attrs&.as_hash,
+          area_custom_attrs: @job.cached_area&.custom_attrs&.as_hash,
+          cuenta_custom_attrs: cuenta_contable&.custom_attrs&.as_hash,
+          division_custom_attrs: @job.cached_area&.department&.cached_division&.custom_attrs,
+          cuenta_contable: cuenta,
+          deber: deber,
+          haber: haber,
+          glosa: glosa,
+          deber_o_haber: debit_or_credit,
+          monto: monto,
+          mostrar_icr: mostrar_icr,
+          nombre_cuenta: cuenta_contable&.nombre,
+          tipo_cuenta: cuenta_contable&.tipo,
+          tipo_doc: cuenta_contable&.tipo_doc,
+          formato: cuenta_contable&.formato || "detalle",
+          origin: @origin,
+          area_name: @job.cached_area&.name,
+          afp: @plan.try(:fondo_cotizacion_print),
+          apvc: @plan.try(:apvc),
+          isapre: @plan.try(:health_company_print),
+          afp_recaudadora: @plan.try(:afp_recaudadora),
+          rut_afp: @plan.try(:rut_fondo_cotizacion_print),
+          rut_isapre: @plan.try(:rut_health_company_print),
+          rol_privado: @employee.rol_privado,
+          dias_trabajados: dias_trabajados,
+          costo_empresa: costo_empresa,
+          rut_recipient: payment_receiver&.rut,
+          first_name_recipient: payment_receiver&.first_name,
+          last_name_recipient: payment_receiver&.last_name,
+          email_recipient: payment_receiver&.email,
+          payment_method_recipient: payment_receiver&.payment_detail&.payment_method,
+          bank_recipient: payment_receiver&.payment_detail&.bank,
+          account_type_recipient: payment_receiver&.payment_detail&.account_type,
+          account_number_recipient: payment_receiver&.payment_detail&.account_number,
+          estado: @employee.estado,
+          rut_apv: search_rut_apv(cuenta_contable, item_code, pension_saving),
+          regimen_apv: search_regimen_apv(cuenta_contable, item_code, pension_saving),
+          institucion_apv: search_institucion_apv(cuenta_contable, item_code, pension_saving),
+          description: description,
+          item_code: item_code,
+          tipo_contrato: @job.tipo_contrato,
+          job: @job,
+          tratos: tratos,
+          is_cuenta2: is_cuenta2,
+          compania_cuenta2: compania_cuenta2,
+          rut_cuenta2: rut_cuenta2,
+          rut_afp_recaudadora: rut_afp_recaudadora_cesantia[@plan&.afp_recaudadora&.to_sym].presence,
+          receptor: receptor,
+          negativo: negativo,
+          line_code: line_code,
+          union_rut: @job.cached_union&.rut,
+          area_centro_costo: @job.area&.centro_costo_definition&.code,
+  )
+
+```

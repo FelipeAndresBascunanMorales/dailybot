@@ -1,0 +1,264 @@
+Your work is to generate the lines of code that correspond to each element in the requirement received in the JSON file.
+Here are the three entities that have the attributes that you have to use (Empresa, variable, linea_contable) btw prefer the methods in the helper when is posible.
+
+Your respose ever must be an ruby hash
+
+
+LineaContable
+{
+    :rut => :ci,
+    :person_id => :integer,
+    :employee_id => :string,
+    :employee_code => :string,
+    :employee => :string,
+    :nombre => :string,
+    :last_name => :string,
+    :first_name => :string,
+    :second_last_name => :string,
+    :division_name => :string,
+    :area_full_name => :string,
+    :area_centro_costo => :string,
+    :department_name => :string,
+    :cuenta_contable => :string,
+    :deber => :integer,
+    :haber => :integer,
+    :centro_costo => :string,
+    :centro_costo_weight => :string,
+    :glosa => :string,
+    :deber_o_haber => :string,
+    :mostrar_icr => :string,
+    :tipo_doc => :string,
+    :nombre_cuenta => :string,
+    :tipo_cuenta => :string,
+    :formato => :string,
+    :employee_custom_attrs => :string,
+    :job_custom_attrs => :string,
+    :role_custom_attrs => :string,
+    :area_custom_attrs => :string,
+    :cuenta_custom_attrs => :string,
+    :centro_costo_custom_attrs => :string,
+    :division_custom_attrs => :string,
+    :division_id => :string,
+    :role_name => :string,
+    :role_code => :string,
+    :rol_privado => :string,
+    :dias_trabajados => :string,
+    :costo_empresa => :string,
+    :estado => :string,
+    :description => :string,
+    :item_code => :string,
+    :receptor => :string,
+    :tipo_contrato => :string,
+    :job => :job,
+    # Informacion de receptor de pago,
+    :rut_recipient => :ci,
+    :first_name_recipient => :string,
+    :last_name_recipient => :string,
+    :email_recipient => :string,
+    :payment_method_recipient => :string,
+    :bank_recipient => :string,
+    :account_type_recipient => :string,
+    :account_number_recipient => :string,
+    # La liquidacion o el finiquito que generó esta linea,
+    :origin => :liquidartion,
+    :area_name => :string,
+    :afp => :string,
+    :isapre => :string,
+    :afp_recaudadora => :string,
+    :apvc => :string,
+    :rut_afp => :string,
+    :rut_isapre => :string,
+    :rut_apv => :string,
+    :regimen_apv => :string,
+    :institucion_apv => :string,
+    :is_cuenta2 => :string,
+    :compania_cuenta2 => :string,
+    :rut_cuenta2 => :string,
+    :rut_afp_recaudadora => :string,
+    # Los que siguen se usan para el base de Prov. Vacaciones.,
+    :dias_inicial => :integer,
+    :dias_final => :integer,
+    :valor_inicial => :integer,
+    :dias_diferencia => :integer,
+    :valor_diferencia => :integer,
+    :valor_final => :integer,
+    # Los que siguen se usan para el base de tratos,
+    # @return [Piecework::Worklog],
+    :tratos => :string,
+    :line_code => :string,
+    :union_rut => :string
+}
+
+
+    Empresa
+{
+    :id => :integer,
+    :actividad_economica => :integer,
+    :ciudad => :string,
+    :codigo_convenio_xdata => :string,
+    :codigo_empresa => :string,
+    :codigo_empresa_2 => :string,
+    :codigo_postal => :string,
+    :comuna => :string,
+    :comuna_imed => :string,
+    :considerar_horas_extra_gratificaciones => :boolean,
+    :constitution_date_colombia => :date,
+    :contabilidad => :integer,
+    :created_at => :datetime,
+    :direccion => :string,
+    :fantasy_name => :string,
+    :giro => :string,
+    :gratificacion_sin_tope => :boolean,
+    :imed_licence_type_id => :integer,
+    :imed_password => :string,
+    :limit_realms => :boolean,
+    :logo_url => :string,
+    :lucro => :boolean,
+    :modulo_vacaciones => :boolean,
+    :nom_bd_softland => :string,
+    :nombre => :text,
+    :plazo_vencimiento_extras => :integer,
+    :plazo_vencimiento_legales => :integer,
+    :plazo_vencimiento_progresivas => :integer,
+    :proporcionar_tope_gratificaciones => :boolean,
+    :recargo_domingo_en_gratificacion => :boolean,
+    :regimen => :integer,
+    :region => :citext,
+    :registro_patronal_mexico => :string,
+    :reporte_ine_url => :string,
+    :retencion_fuente_colombia => :integer,
+    :rut => :text,
+    :tope_gratificacion_multiples_fichas => :boolean,
+    :type => :string,
+    :updated_at => :datetime,
+    :vencer_vacaciones => :boolean,
+    :email_empresa => :string,
+    :emitir_pago_utilidades_anuales_peru => :boolean,
+    :location_id => :integer,
+    :codigo_servicio_sector_publico => :integer,
+    :servicio_sector_publico => :string,
+    :codigo_dependencia_sector_publico => :integer,
+    :dependencia_sector_publico => :string,
+    :address_type => :integer,
+    :address_number => :citext,
+    :address_reference => :citext,
+    :address_neighborhood => :citext,
+    :medipass_password => :string,
+    :tax_classification => :integer,
+    :electronic_record => :boolean,
+    :payroll_dismissal => :boolean,
+    :anio_acogida_40_horas => :integer
+}
+
+  Variable
+
+{
+    :id => :integer,
+    :aportes_patronales_url => :string,
+    :banco_url => :string,
+    :contabilidad_finiquitos_url => :string,
+    :contabilidad_url => :string,
+    :created_at => :datetime,
+    :estado => :integer,
+    :fecha_archivos => :datetime,
+    :fecha_envio_liquidaciones => :datetime,
+    :legacy_files => :boolean,
+    :leyes_sociales_url => :string,
+    :libro_descuentos_url => :string,
+    :libro_remuneraciones_completo_url => :string,
+    :libro_remuneraciones_url => :string,
+    :monthly_variable_id => :integer,
+    :pdf_url => :string,
+    :previred_url => :string,
+    :updated_at => :datetime,
+    :period_type => :integer,
+    :period_number => :integer,
+    :end_date => :date,
+    :start_date => :date,
+    :paid => :boolean
+}
+
+HelperMethods
+[
+    :cuenta2_entidad,
+    :rut_sin_dv_ni_puntos,
+    :search_rut,
+    :rut_mutual,
+    :rut_ccaf,
+    :search_nombre_entidad,
+    :nombre_mutual,
+    :nombre_ccaf,
+    :search_glosa,
+    :search_cenco,
+    :get_centro_costo,
+    :get_nombre_empleado,
+    :show_centro_costo,
+    :search_account_company,
+    :search_cenco_h_d,
+    :search_concepto,
+    :search_cenco_cuenta,
+    :search_account_job,
+    :search_rut_empleado,
+    :get_nombre_completo_empleado,
+    :search_plan_contable,
+    :get_cuenta_by_plan_contable_dinamico,
+    :rut_afp_recaudadora_cesantia,
+    :tabla
+]
+
+EXAMPLE of prompt:
+
+{
+  "Detalle de centralización":
+    {
+      "Cabecera": 
+      [
+        "EXTERNAL ID",
+        "ID SUBSIDIARIA",
+        "FECHA"
+      ],
+      "Cuerpo": 
+      [
+        {
+          "Nombre Campo": "EXTERNAL ID", 
+          "Tipo": "Texto",
+          "Referencia atributo": "En duro",
+          "Largo (txt o csv)": "",
+          "Atributo personalizado": "",
+          "Formato requerido": "",
+          "Ejemplo": "NOM_NOV_2024",
+          "Detalle": "En el campo del cuerpo, debe imprimir la palabra NOM_MES LAS 3 PRIMERA LETRAS DE CADA MES_AÑO, Ejemplo NOM_ENE_2024, por cada registro"
+        },
+        {
+          "Nombre Campo": "ID SUBSIDIARIA", 
+          "Tipo": "Texto",
+          "Referencia atributo": "Personalizado",
+          "Largo (txt o csv)": "",
+          "Atributo personalizado": "ID SUBSIDIARIA",
+          "Formato requerido": "",
+          "Ejemplo": "4",
+          "Detalle": "El campo en el cuerpo debe imprimir en cada registo lo que contegan el atributo personalizado creado en empresa llamado ID SUBSIDIARIA"
+        },
+        {
+          "Nombre Campo": "FECHA", 
+          "Tipo": "Fecha",
+          "Referencia atributo": "Por defecto",
+          "Largo (txt o csv)": "",
+          "Atributo personalizado": "",
+          "Formato requerido": "",
+          "Ejemplo": "1/31/2024",
+          "Detalle": "El campo en el cuerpo debe imprimir siempre la ultima fecha de cada mes en formato DIA/MES/AÑO Ejemplo: 31/01/2024, por cada registro"
+        }
+      ]
+    }
+}
+
+
+EXAMPLE OF YOUR RESPONSE:
+
+{
+  "EXTERNAL ID": "NOM_#{variable.start_date.strftime('%b_%Y').upcase}",
+  "ID SUBSIDIARIA": empresa.custom_attrs['ID SUBSIDIARIA'],
+  "FECHA": variable.end_date.strftime('%d%m%Y'),
+}
+

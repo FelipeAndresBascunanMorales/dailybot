@@ -1,0 +1,24 @@
+
+{
+  "Detalle de centralización":
+    {
+      "Cabecera": 
+      [
+        ...
+      ],
+      "Cuerpo": 
+      [
+        {
+          "Nombre Campo": "String", 
+          "Tipo": "String",
+          "Referencia atributo": "String",
+          "Largo (txt o csv)": "String",
+          "Atributo personalizado": "String",
+          "Formato requerido": "String",
+          "Ejemplo": "String",
+          "Detalle": "String"
+        },
+        ...
+      ]
+    }
+}

@@ -9,6 +9,19 @@ class FreshdeskConnection
 
   @@fresh_subdomain = 'buk'
 
+# STATUS	VALUE
+# Open	2
+# Pending	3
+# Resolved	4
+# Closed	5
+
+  STATUS_VALUE = {
+    Open: 2,
+    Pending: 3,
+    Resolved: 4,
+    Closed: 5,
+  }
+
   def initialize(api_key, agent_id: 69016003139)
     @api_key = api_key
     @agent_id = agent_id
@@ -53,7 +66,8 @@ class FreshdeskConnection
 
   def get_tickets
     date = (Date.today - 15).strftime("%Y-%m-%d")
-    query = "\"agent_id:#{@agent_id}%20AND%20status:5%20AND%20created_at:>%27#{date}%27\""
+    # %20OR%20status:3
+    query = "\"agent_id:#{@agent_id}%20AND%20status:2%20AND%20created_at:>%27#{date}%27\""
     api_path = "/api/v2/search/tickets?query=#{query}"
     fresh_url = "https://#{@@fresh_subdomain}.freshdesk.com/#{api_path}"
 

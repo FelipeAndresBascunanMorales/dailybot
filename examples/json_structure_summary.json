@@ -1,0 +1,16 @@
+
+{
+  "formato_archivo": "String",
+  "separador_archivo": "String",
+  "cantidad_archivos": 1,
+  "formato_segundo_archivo": "String",
+  "requiere_cabecera": "boolean",
+  "cabecera_archivo_aparte": "boolean",
+  "requiere_pie": "boolean",
+  "pie_archivo_aparte": "boolean",
+  "centralizacion_agrupada": "boolean",
+  "centralizacion_separada": "boolean",
+  "utiliza_atributo_agrupador": "boolean",
+  "nombre_atributo_separador": "String"
+}
+
