@@ -22,7 +22,7 @@ class Dailybot
     gpt = ChatgptConnection.new(ENV["CHATGPT_API_KEY"])
     tickets_summarized = gpt.get_tickets_summary(tickets)
     tickets_summarized.each do |ticket, v|
-      puts ticket
+      # puts ticket
     end
 
 
@@ -31,18 +31,21 @@ class Dailybot
 
     tickets_summarized.each do |ticket|
 
-      description = ticket['summary']
-      subdomain = ticket['company']# url.match(/^http[s]?:\/\/([a-zA-Z0-9-]+)\./)&.captures&.first
+      summary = ticket['summary']
+      subdomain = ticket['company'] # url.match(/^http[s]?:\/\/([a-zA-Z0-9-]+)\./)&.captures&.first
 
       # url_company = ticket[custom_url_empresa] || description.regex(\http...buk.[cl|pe|br|co|mx]..\)
       # folder_name = url_company.tr('https://', '').tr('.buk*', '')
 
       ticket_id = ticket['id']
 
-      puts "#{ticket_id} #{subdomain} #{description}"
+      puts "#{ticket_id}".colorize(:yellow) + "#{subdomain}" + "#{summary}"
+
       # *pendiente
       # connect to drive to download files
       # files = DriveConnection.new().download_files(ticket)
+
+      # puts "#{k}:".colorize(:yellow) + " #{v}".colorize(get_color(v))
 
       
       # seleccionar template (template, extension, pais, nombre_contabilidad)
@@ -60,10 +63,22 @@ class Dailybot
     end
 
 
+
     ticket = tickets_summarized.select{|t| t['id'] == ticket_selected.to_i}.first
     exit if ticket.nil?
     folder_name = "#{ticket['id']} #{ticket['company']}"
-    file_manager.create_folder(folder_name)
+    folder = file_manager.create_folder(folder_name)
+    puts "folder created => #{folder}"
+    puts "download the requeriment file and put that in the ticket's folder"
 
+    ticket_attached_file = ticket['attached_file']
+
+    puts "descargar archivo de levantamiento " + "\e]8;;#{ticket_attached_file}\aAQUÍ\e]8;;\a"
+
+    waiting = gets
+    data_from_xlsx = file_manager.read_xlsx_file
+    csv_path = file_manager.create_csv_file(data_from_xlsx, ticket['company'], ticket['country'])
+
+    json_data = gpt.generate_json_data(csv_path)
   end
 end

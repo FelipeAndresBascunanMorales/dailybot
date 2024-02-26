@@ -1,0 +1,54 @@
+{
+  "name": "get_template",
+  "description": "you send pieces of code inside different string arguments and receive the Ruby code with the template that will be completed with the code that you sent in the attributes",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "headers": {
+        "type": "array",
+        "description": "Headers"
+      },
+
+      "variables": {
+      "type": "string",
+      "description": "block of code with the variables needed from the Empresa and Variable objects"
+        },
+      
+      "obj_contabilidad_group_by": {
+        "type": "hash",
+        "description": "a hash with all the variables needed from the LineaContable object in a key value format"
+        },
+      
+      "each_row": {
+        "type": "string",
+        "description": "an array with each value needed to fill a row based on the requirement"
+        },
+
+        "format": {
+          "type": "string",
+          "description": "the format of the file to decide which the template",
+          "enum": [
+            "xlsx",
+            "txt",
+            "csv"
+          ]
+        },
+      
+      "country": {
+          "type": "string",
+          "enum": [
+            "CL",
+            "CO",
+            "PE",
+            "MX",
+            "BR"
+          ]
+        }
+      },
+      "required": [
+        "country",
+        "format",
+        "each_row"
+      ]
+  }
+}
