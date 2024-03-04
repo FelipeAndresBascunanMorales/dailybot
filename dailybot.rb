@@ -1,4 +1,35 @@
 #!/usr/bin/env ruby
+
+# The Handler interface
+class Handler
+  def next_handler=(handler)
+    raise NotImplementedError, "#{self.class} has no implemented method #{__method__}"
+  end
+
+  def handle(request)
+    raise NotImplementedError, "#{self.class} has no implemented method #{__method__}"
+  end
+end
+
+# the base abstract handler
+class AbstractHandler < Handler
+  attr_writer :next_handler
+
+  def next_handler(handler)
+    @next_handler = handler
+
+    handler
+  end
+
+  def handle(request)
+    return @next_handler.handle(request) if @next_handler
+
+    nil
+  end
+end
+
+
+
 class Dailybot
   require 'rubygems'
   require 'dotenv/load'
@@ -11,74 +42,45 @@ class Dailybot
 
   $LOAD_PATH << File.join(__dir__, '.')
 
-  autoload :FreshdeskConnection, 'freshdesk_connection'
-  autoload :ChatgptConnection, 'chatgpt_connection'
-  autoload :FileManager, 'file_manager'
+  autoload :FreshdeskHandler, 'freshdesk_handler'
+  autoload :ChatgptHandler, 'chatgpt_handler'
+  autoload :FileManagerHandler, 'file_manager_handler'
+  autoload :ConsoleHandler, 'console_handler'
 
   def looking_what_is_new
-    fresh = FreshdeskConnection.new(ENV["FRESH_API_KEY"])
-    tickets = fresh.get_tickets
+    freshdesk = FreshdeskHandler.new(ENV["FRESH_API_KEY"])
+    gpt = ChatgptHandler.new(ENV["CHATGPT_API_KEY"])
+    file_manager = FileManagerHandler.new
+    console_interaction = ConsoleHandler.new
+    gpt_agent = ChatgptHandler.new(ENV["CHATGPT_API_KEY"], ENV["ASSISTANT_ID"])
 
-    gpt = ChatgptConnection.new(ENV["CHATGPT_API_KEY"])
-    tickets_summarized = gpt.get_tickets_summary(tickets)
-    tickets_summarized.each do |ticket, v|
-      # puts ticket
-    end
-
-
-    # crear carpeta cliente
-    file_manager = FileManager.new()
-
-    tickets_summarized.each do |ticket|
-
-      summary = ticket['summary']
-      subdomain = ticket['company'] # url.match(/^http[s]?:\/\/([a-zA-Z0-9-]+)\./)&.captures&.first
-
-      # url_company = ticket[custom_url_empresa] || description.regex(\http...buk.[cl|pe|br|co|mx]..\)
-      # folder_name = url_company.tr('https://', '').tr('.buk*', '')
-
-      ticket_id = ticket['id']
-
-      puts "#{ticket_id}".colorize(:yellow) + "#{subdomain}" + "#{summary}"
-
-      # *pendiente
-      # connect to drive to download files
-      # files = DriveConnection.new().download_files(ticket)
-
-      # puts "#{k}:".colorize(:yellow) + " #{v}".colorize(get_color(v))
-
+    pasos
+    1.- tomar la data del ticket
+    2.- resumirla con chatgpt
+    3.- preguntar al usuario qué ticket trabajar
+    4.- crear la carpeta
+      4.1.- Esperar que el usuario cargue el archivo excel
+      4.2.- extraer la data del archivo excel
+      4.3.- crear el csv formateado
+    5.- enviar la data al agente chatgpt
       
+
+      # estamos aquí
+      # en FileManager crear el mètodo get_template, ver como lo responde el asistente
+
+      5.1.- usar la respuesta del agente para prepara el template
+      5.2.- enviar el template al agente
+    6.- crear el archivo en la ruta de centras de buk
+
+
+    freshdesk.next_handler(gpt).next_handler(console_interaction).next_handler(file_manager).next_handler(gpt_agent)
+    freshdesk.handle
+
+
       # seleccionar template (template, extension, pais, nombre_contabilidad)
       # generar data en generate_doc
-      # 
-    end
-    
-    puts "do you want to work in a ticket?"
-    puts "enter the ticket id if you want"
-    puts "ctrl+c or exit"
-    ticket_selected = gets.chomp
-    if ['exit', 'n', 'no', nil, '', ' '].include?(ticket_selected.downcase)
-      puts 'bye'
-      exit
-    end
 
-
-
-    ticket = tickets_summarized.select{|t| t['id'] == ticket_selected.to_i}.first
-    exit if ticket.nil?
-    folder_name = "#{ticket['id']} #{ticket['company']}"
-    folder = file_manager.create_folder(folder_name)
-    puts "folder created => #{folder}"
-    puts "download the requeriment file and put that in the ticket's folder"
-
-    ticket_attached_file = ticket['attached_file']
-
-    puts "descargar archivo de levantamiento " + "\e]8;;#{ticket_attached_file}\aAQUÍ\e]8;;\a"
-
-    waiting = gets
-    data_from_xlsx = file_manager.read_xlsx_file
-    csv_path = file_manager.create_csv_file(data_from_xlsx, ticket['company'], ticket['country'])
-
+      
     json_data = gpt.generate_json_data(csv_path)
   end
 end

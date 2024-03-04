@@ -1,0 +1,49 @@
+{
+  "name": "get_template",
+  "description": "to receive the snippet code with the necesary data to generate a file, this template code that must be completed with data",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "format": {
+        "type": "string",
+        "description": "the format of the file to decide which the template",
+        "enum": [
+          "xlsx",
+          "txt",
+          "csv"
+        ]
+      },
+      "country": {
+        "type": "string",
+        "enum": [
+          "CL",
+          "CO",
+          "PE",
+          "MX",
+          "BR"
+        ]
+      }
+    },
+    "grouped_data": {
+      "description": "that is if the data use the 'agrupador' attribute",
+      "type": "boolean"
+    },
+    "separated_in_files": {
+      "description": "that is true if some atribute will be used to separate the data by sheet",
+      "type": "boolean"
+    },
+    "separated_in_sheets": {
+      "description": "that is true if some atribute will ber used to separate the data in differents files",
+      "type": "boolean"
+    },
+    "headers": {
+      "description": "that is true unless was specified in the requeriment",
+      "type": "boolean"
+    },
+    "required": [
+      "format",
+      "country",
+      "grouped_data"
+    ]
+  }
+}
