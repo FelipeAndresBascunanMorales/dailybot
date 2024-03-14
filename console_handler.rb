@@ -2,9 +2,9 @@ class ConsoleHandler < AbstractHandler
 
   def handle(request)
     key, value = request.to_a.flatten
-
     case key
     when :ticket_summarized
+      value = [value] unless value.is_a?(Array)
       print_ticket_summarized(value)
       choosen_ticket = choose_ticket(value)
 
@@ -24,7 +24,7 @@ class ConsoleHandler < AbstractHandler
       subdomain = ticket['company']
       ticket_id = ticket['id']
 
-      puts "#{ticket_id}".colorize(:yellow) + "#{subdomain}" + "#{summary}"
+      puts "#{ticket_id}".colorize(:yellow) + ' ' + "#{subdomain}" + ' ' + "#{summary}"
     end
   end
 
@@ -39,7 +39,11 @@ class ConsoleHandler < AbstractHandler
     end
 
     ticket = tickets.select{|t| t['id'] == ticket_selected.to_i}.first
-    exit if ticket.nil?
+    if ticket.nil?
+      puts "vamos de nuevo"
+      choose_ticket(tickets)
+    end
+
     {
       folder_name: "#{ticket['id']} #{ticket['company']}",
       ticket: ticket

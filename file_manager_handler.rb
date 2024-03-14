@@ -14,10 +14,11 @@ class FileManagerHandler < AbstractHandler
     key, value = request.to_a.flatten
     case key
     when :ticket_to_work
-      create_folder(value[:file_name])
-      ConsoleHandler.print_link(value['attached_file'], 'AQUÍ', MSJ_DESCARGA)
+      create_folder(value[:folder_name])
+      binding.pry
+      ConsoleHandler.print_link(value[:ticket]['attached_file'], 'AQUÍ', MSJ_DESCARGA)
       read_xlsx_file
-      csv = create_csv_file(value['company'], value['country'])
+      csv = create_csv_file(value[:ticket]['company'], value[:ticket]['country'])
       
       super({to_jsonify: csv})
     end
@@ -108,7 +109,121 @@ class FileManagerHandler < AbstractHandler
   def create_centra_file(name, country)
   end
 
-  def self.get_template(format, country, grouped_data, separated_in_files = false, separated_in_sheets = false, headers = true)
+  def self.get_template(data)
+    # format, country, grouped_data, separated_in_files = false, separated_in_sheets = false, headers = true
     
+    key = {
+      format: data['format'],
+      # country: data['country'],
+      grouped_data: data['grouped_data'],
+      separated_in_files: data['separated_in_files'],
+      separated_in_sheets: data['separated_in_sheets'],
+    }
+
+    TEMPLATES[key]
   end
+
+  TEMPLATES = {
+    {
+      format: 'xlsx',
+      grouped_data: true,
+      separated_in_files: false,
+      separated_in_sheets: false,
+    } => [
+            "# frozen_string_literal: true",
+            "",
+            "#",
+            "# clase para generar centralizacion contable personalizada para ${TM_FILENAME_BASE/[\\_]+/ /g}",
+            "class Exportador::Contabilidad::${2|Chile,Colombia,Peru,Mexico|}::Personalizadas::${TM_FILENAME_BASE/(.*)/${1:/pascalcase}/} < Exportador::Contabilidad::${2}::CentralizacionContable",
+            "  def initialize",
+            "    super()",
+            "    @extension = 'xlsx'",
+            "  end",
+            "",
+            "  CABECERA = [",
+            "    ${0:'cabecera',}",
+            "  ].freeze",
+            "",
+            "  def generate_doc(empresa, variable, obj_contabilidad)",
+            "    return unless obj_contabilidad.present?",
+            "",
+            "    book = Exportador::BaseXlsx.crear_libro",
+            "    book.worksheets = []",
+            "    sheet = Exportador::BaseXlsx.crear_hoja book, empresa.nombre",
+            "    Exportador::BaseXlsx.autofit sheet, [CABECERA]",
+            "    Exportador::BaseXlsx.crear_encabezado(sheet, CABECERA, 0)",
+            "",
+            "    date = Variable::Utils.end_of_period(variable.start_date, variable.period_type)",
+            "    date_ddmmyyyy = date.strftime('%d-%m-%Y')",
+            "",
+            "    data = obj_contabilidad.lazy.map do |l|",
+            "      [",
+            "        ",
+            "",
+            "        date_ddmmyyyy,",
+            "        l.cuenta_contable,",
+            "        l.glosa,",
+            "        l.deber,",
+            "        l.haber,",
+            "      ]",
+            "    end",
+            "",
+            "    Exportador::BaseXlsx.escribir_celdas sheet, data, offset: 1, number_format: '#,##0'",
+            "    Exportador::BaseXlsx.cerrar_libro(book).contenido",
+            "  end",
+            "end",
+            "",
+          ],
+          {
+            format: 'xlsx',
+            grouped_data: nil,
+            separated_in_files: nil,
+            separated_in_sheets: nil,
+          } => [
+                  "# frozen_string_literal: true",
+                  "",
+                  "#",
+                  "# clase para generar centralizacion contable personalizada para ${TM_FILENAME_BASE/[\\_]+/ /g}",
+                  "class Exportador::Contabilidad::${2|Chile,Colombia,Peru,Mexico|}::Personalizadas::${TM_FILENAME_BASE/(.*)/${1:/pascalcase}/} < Exportador::Contabilidad::${2}::CentralizacionContable",
+                  "  def initialize",
+                  "    super()",
+                  "    @extension = 'xlsx'",
+                  "  end",
+                  "",
+                  "  CABECERA = [",
+                  "    ${0:'cabecera',}",
+                  "  ].freeze",
+                  "",
+                  "  def generate_doc(empresa, variable, obj_contabilidad)",
+                  "    return unless obj_contabilidad.present?",
+                  "",
+                  "    book = Exportador::BaseXlsx.crear_libro",
+                  "    book.worksheets = []",
+                  "    sheet = Exportador::BaseXlsx.crear_hoja book, empresa.nombre",
+                  "    Exportador::BaseXlsx.autofit sheet, [CABECERA]",
+                  "    Exportador::BaseXlsx.crear_encabezado(sheet, CABECERA, 0)",
+                  "",
+                  "    date = Variable::Utils.end_of_period(variable.start_date, variable.period_type)",
+                  "    date_ddmmyyyy = date.strftime('%d-%m-%Y')",
+                  "",
+                  "    data = obj_contabilidad.lazy.map do |l|",
+                  "      [",
+                  "        ",
+                  "",
+                  "        date_ddmmyyyy,",
+                  "        l.cuenta_contable,",
+                  "        l.glosa,",
+                  "        l.deber,",
+                  "        l.haber,",
+                  "      ]",
+                  "    end",
+                  "",
+                  "    Exportador::BaseXlsx.escribir_celdas sheet, data, offset: 1, number_format: '#,##0'",
+                  "    Exportador::BaseXlsx.cerrar_libro(book).contenido",
+                  "  end",
+                  "end",
+                  "",
+                ]
+  }
+
 end

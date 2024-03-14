@@ -20,29 +20,33 @@ class ChatgptHandler < AbstractHandler
       summary = {ticket_summarized: get_tickets_summary(value)}
       super(summary)
     when :to_jsonify
+      binding.pry
       json_data = generate_json_data(value)
       #create_assistant() ... was created in the playground
       thread = create_thread
-      add_message(thread, json_data) # first message, the agent must response with the function to call te template
+      add_message(thread['id'], json_data) # first message, the agent must response with the function to call te template
 
-      run = run_assistant(thread)
+      run = run_assistant(thread['id'])
       
-      function_response = get_response(run["id"], thread['id'])
+      function_tool = get_response(run["id"], thread['id'])
+      function_argument = function_tool['function']['arguments']
+      
+
+
+      template = get_template(JSON.parse(function_argument))
       # show the response before continue
-      exit unless function_response.start_with?('get_template')
-      puts function_response
-      get 
-      template = eval(function_response)
+      # exit unless function_response.start_with?('get_template')
+      # puts function_response
+      # get 
+      # template = eval(function_response)
 
       
+      submit_tool_outputs(thread['id'], run['id'], function_tool['id'], template.join("\n"))  #second_message, must recieve the centra completed
 
-      add_message(thread, template) #second_message, must recieve the centra completed
-      get_response(run, thread['id'])
-
-      centra_response
-
-
+      # add_message(thread['id'], template.join("\n")) #second_message, must recieve the centra completed
+      final_response = get_response(run['id'], thread['id'])
       
+      final_response
     end
   end
 
@@ -103,7 +107,7 @@ class ChatgptHandler < AbstractHandler
   end
 
   def add_message(thread, data)
-    add_message_endpoint = " https://api.openai.com/v1/threads/#{thread}/messages"
+    add_message_endpoint = "https://api.openai.com/v1/threads/#{thread}/messages"
 
     payload = {
       "role": "user",
@@ -111,49 +115,83 @@ class ChatgptHandler < AbstractHandler
     }
 
     response = RestClient.post(add_message_endpoint, payload.to_json, {content_type: "application/json", :Authorization => "Bearer #{@api_key}", "OpenAI-Beta" => "assistants=v1"})
-    JSON.parse(response.body['data'])
+    # JSON.parse(response.body['data'])
+  end
+
+
+  def submit_tool_outputs(thread_id, run_id, call_id, data)
+    add_message_endpoint = "https://api.openai.com/v1/threads/#{thread_id}/runs/#{run_id}/submit_tool_outputs"
+
+    payload = {
+      "tool_outputs": [
+        {
+          "tool_call_id": call_id,
+          "output": data.to_s
+        }
+      ]
+    }
+
+    response = RestClient.post(add_message_endpoint, payload.to_json, {content_type: "application/json", :Authorization => "Bearer #{@api_key}", "OpenAI-Beta" => "assistants=v1"})
+    # JSON.parse(response.body['data'])
+  end
+
+  # "threads/#{thread}/messages"
+  # "threads/#{thread_id}/runs"
+
+  def generic_get(endpoint)
+    path = "https://api.openai.com/v1/#{endpoint}"
+
+    headers = {:Authorization => "Bearer #{@api_key}", "OpenAI-Beta" => "assistants=v1"}
+    response = RestClient.get(path, headers)
+    JSON.parse(response.body)
   end
 
   def get_response(run_id, thread_id)
-    path = "https://api.openai.com/v1/threads/#{thread}/runs/#{run_id}"
+    path = "https://api.openai.com/v1/threads/#{thread_id}/runs/#{run_id}"
 
     headers = {:Authorization => "Bearer #{@api_key}", "OpenAI-Beta" => "assistants=v1"}
-    params = {}
 
-    response = RestClient.gets(path, headers: headers, params: params)
-    status = JSON.parse(response.body)
+    response = RestClient.get(path, headers)
+    response_body = JSON.parse(response.body)
+    status = response_body['status'] 
 
-    if ['in_progress', 'queued'].include?(status['status'])
+    if ['in_progress', 'queued'].include?(status)
       p '... :) '
       sleep(2)
       get_response(run_id, thread_id)
-    elsif ['requires_action', 'cancelling', 'cancelled', 'failed', 'expired'].include?(status)
+    elsif status == 'requires_action'
+      function_tool = response_body['required_action']['submit_tool_outputs']['tool_calls'].first
+      if function_tool['function']['name'] == 'get_template'
+        return function_tool
+      end
+    elsif ['cancelling', 'cancelled', 'failed', 'expired'].include?(status)
       p " :( "
       puts "error en la respuesta del agente"
     elsif status == 'completed'
       p " :D "
       puts 'first response completed'
+      binding.pry
+      messages = generic_get("threads/#{thread_id}/messages")
+      
+      last_response = messages["data"].map do |m|
+        next unless m['role'] == 'assistant'
+
+        m['content'].first['text']['value']
+      end
+      last_response.compact!
+
+      if last_response.count != 1
+        puts "El asistente respondió con más de 1 mensaje"
+        return ''
+      end
+      last_response.flatten
     else
       puts 'algo raro pasó aquí, chao'
       exit
     end
-
-    messages = get_messages(thread_id)
-    
-    last_response = messages["data"].reverse.map do |m|
-      break unless m['role'] == 'assistant'
-
-      m&.dig('content', 'text', 'value')
-    end
-
-    if last_response.count != 1
-      puts "El asistente respondió con más de 1 mensaje"
-      return ''
-    end
-    last_response.flatten
   end
 
-  def get_messages()
+  def get_messages(thread)
     path = "https://api.openai.com/v1/threads/#{thread}/messages"
 
     headers = {:Authorization => "Bearer #{@api_key}", "OpenAI-Beta" => "assistants=v1"}
@@ -167,17 +205,17 @@ class ChatgptHandler < AbstractHandler
     run_assistant_endpoint = "https://api.openai.com/v1/threads/#{thread}/runs"
 
     payload = {
-      "assistant_id": @assistant
+      "assistant_id": @assistant_id
     }
 
-    response = RestClient.post(run_assistant_endpoint, payload.to_json, {content_type: "application/json", :Authorization => "Bearer #{@api_key}", "OpenAI-Beta" => "assistants=v1"})
-    content = JSON.parse(response.body)
+    response = RestClient.post(run_assistant_endpoint, payload, {content_type: "application/json", :Authorization => "Bearer #{@api_key}", "OpenAI-Beta" => "assistants=v1"})
+    JSON.parse(response.body)
   end
 
 
   def generate_json_data(file_with_data)
     data = File.read(file_with_data)
-    return unless data.present?
+    return if data.nil?
     openai_url = "https://api.openai.com/v1/chat/completions"
     payload = {
       "model": "gpt-4-turbo-preview",
@@ -207,8 +245,8 @@ class ChatgptHandler < AbstractHandler
 
   private
 
-  def get_template(*data)
-    FileManager.get_template(data)
+  def get_template(data)
+    FileManagerHandler.get_template(data)
   end
 end
 

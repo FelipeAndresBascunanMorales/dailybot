@@ -54,23 +54,23 @@ class Dailybot
     console_interaction = ConsoleHandler.new
     gpt_agent = ChatgptHandler.new(ENV["CHATGPT_API_KEY"], ENV["ASSISTANT_ID"])
 
-    pasos
-    1.- tomar la data del ticket
-    2.- resumirla con chatgpt
-    3.- preguntar al usuario qué ticket trabajar
-    4.- crear la carpeta
-      4.1.- Esperar que el usuario cargue el archivo excel
-      4.2.- extraer la data del archivo excel
-      4.3.- crear el csv formateado
-    5.- enviar la data al agente chatgpt
+    # pasos
+    # 1.- tomar la data del ticket
+    # 2.- resumirla con chatgpt
+    # 3.- preguntar al usuario qué ticket trabajar
+    # 4.- crear la carpeta
+    #   4.1.- Esperar que el usuario cargue el archivo excel
+    #   4.2.- extraer la data del archivo excel
+    #   4.3.- crear el csv formateado
+    # 5.- enviar la data al agente chatgpt
       
 
       # estamos aquí
       # en FileManager crear el mètodo get_template, ver como lo responde el asistente
 
-      5.1.- usar la respuesta del agente para prepara el template
-      5.2.- enviar el template al agente
-    6.- crear el archivo en la ruta de centras de buk
+    #   5.1.- usar la respuesta del agente para prepara el template
+    #   5.2.- enviar el template al agente
+    # 6.- crear el archivo en la ruta de centras de buk
 
 
     freshdesk.next_handler(gpt).next_handler(console_interaction).next_handler(file_manager).next_handler(gpt_agent)
@@ -81,6 +81,5 @@ class Dailybot
       # generar data en generate_doc
 
       
-    json_data = gpt.generate_json_data(csv_path)
   end
 end
