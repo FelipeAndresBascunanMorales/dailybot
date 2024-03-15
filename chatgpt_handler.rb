@@ -20,9 +20,11 @@ class ChatgptHandler < AbstractHandler
       summary = {ticket_summarized: get_tickets_summary(value)}
       super(summary)
     when :to_jsonify
-      binding.pry
+      puts "creando json"
       json_data = generate_json_data(value)
       #create_assistant() ... was created in the playground
+      
+      puts "activando asistente"
       thread = create_thread
       add_message(thread['id'], json_data) # first message, the agent must response with the function to call te template
 
@@ -30,9 +32,8 @@ class ChatgptHandler < AbstractHandler
       
       function_tool = get_response(run["id"], thread['id'])
       function_argument = function_tool['function']['arguments']
-      
 
-
+      puts "generando template"
       template = get_template(JSON.parse(function_argument))
       # show the response before continue
       # exit unless function_response.start_with?('get_template')
@@ -40,13 +41,19 @@ class ChatgptHandler < AbstractHandler
       # get 
       # template = eval(function_response)
 
-      
-      submit_tool_outputs(thread['id'], run['id'], function_tool['id'], template.join("\n"))  #second_message, must recieve the centra completed
+      submit_tool_outputs(thread['id'], run['id'], function_tool['id'], template)
 
       # add_message(thread['id'], template.join("\n")) #second_message, must recieve the centra completed
       final_response = get_response(run['id'], thread['id'])
-      
-      final_response
+
+      final_response = final_response.first.gsub(/^```ruby\s*|```$/, '')
+      data = {
+        data: final_response,
+        country: function_argument['country'],
+        company: function_argument['company']
+      }
+      puts "template generado"
+      super({ write_to_buk: data })
     end
   end
 
@@ -91,7 +98,7 @@ class ChatgptHandler < AbstractHandler
       "file_ids": ["file-BK7bzQj3FfZFXr7DbL6xJwfo"]
     }
 
-    response = RestClient.post(create_thread_endpoint, payload.json, {content_type: "application/json", :Authorization => "Bearer #{@api_key}", "OpenAI-Beta" => "assistants=v1"})
+    response = RestClient.post(create_thread_endpoint, payload.to_json, {content_type: "application/json", :Authorization => "Bearer #{@api_key}", "OpenAI-Beta" => "assistants=v1"})
 
     # try to find the assistant identifier
     content = JSON.parse(response.body)
@@ -170,7 +177,6 @@ class ChatgptHandler < AbstractHandler
     elsif status == 'completed'
       p " :D "
       puts 'first response completed'
-      binding.pry
       messages = generic_get("threads/#{thread_id}/messages")
       
       last_response = messages["data"].map do |m|
@@ -208,7 +214,7 @@ class ChatgptHandler < AbstractHandler
       "assistant_id": @assistant_id
     }
 
-    response = RestClient.post(run_assistant_endpoint, payload, {content_type: "application/json", :Authorization => "Bearer #{@api_key}", "OpenAI-Beta" => "assistants=v1"})
+    response = RestClient.post(run_assistant_endpoint, payload.to_json, {content_type: "application/json", :Authorization => "Bearer #{@api_key}", "OpenAI-Beta" => "assistants=v1"})
     JSON.parse(response.body)
   end
 

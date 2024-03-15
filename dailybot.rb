@@ -73,7 +73,7 @@ class Dailybot
     # 6.- crear el archivo en la ruta de centras de buk
 
 
-    freshdesk.next_handler(gpt).next_handler(console_interaction).next_handler(file_manager).next_handler(gpt_agent)
+    freshdesk.next_handler(gpt).next_handler(console_interaction).next_handler(file_manager).next_handler(gpt_agent).next_handler(file_manager)
     freshdesk.handle
 
 
