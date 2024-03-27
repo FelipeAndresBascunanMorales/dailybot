@@ -14,14 +14,17 @@ class ChatgptHandler < AbstractHandler
   end
 
   def handle(request)
-    key, value = request.to_a.flatten
+    key, value = [request.keys.first, request.values.flatten]
     case key
     when :fresh_data
       summary = {ticket_summarized: get_tickets_summary(value)}
       super(summary)
     when :to_jsonify
+      value = value.first if value.is_a?(Array)
       puts "creando json"
-      json_data = generate_json_data(value)
+      
+      val = value.is_a?(Array) ? value.first : value
+      json_data = generate_json_data(val)
       #create_assistant() ... was created in the playground
       
       puts "activando asistente"
@@ -31,10 +34,10 @@ class ChatgptHandler < AbstractHandler
       run = run_assistant(thread['id'])
       
       function_tool = get_response(run["id"], thread['id'])
-      function_argument = function_tool['function']['arguments']
+      function_argument = JSON.parse(function_tool['function']['arguments'])
 
       puts "generando template"
-      template = get_template(JSON.parse(function_argument))
+      template = get_template(function_argument)
       # show the response before continue
       # exit unless function_response.start_with?('get_template')
       # puts function_response
@@ -49,8 +52,8 @@ class ChatgptHandler < AbstractHandler
       final_response = final_response.first.gsub(/^```ruby\s*|```$/, '')
       data = {
         data: final_response,
-        country: function_argument['country'],
-        company: function_argument['company']
+        company: function_argument['company_name'],
+        country: function_argument['country']
       }
       puts "template generado"
       super({ write_to_buk: data })
@@ -242,11 +245,43 @@ class ChatgptHandler < AbstractHandler
       "presence_penalty": 0
     }
 
+    # response = RestClient.post(openai_url, payload.to_json, {content_type: "application/json", :Authorization => "Bearer #{@api_key}"})
+    response = RestClient::Request.execute(method: :post, url: openai_url, payload: payload.to_json, timeout: 160, headers: {content_type: "application/json", :Authorization => "Bearer #{@api_key}"})
 
-    response = RestClient.post(openai_url, payload.to_json, {content_type: "application/json", :Authorization => "Bearer #{@api_key}"})
     content = JSON.parse(response.body)&.dig("choices",0, "message", "content")
     content = content.gsub(/^```json\s*|```$/, '')
     JSON.parse(content)
+  end
+
+  
+  def self.clean_data(data, key)
+    data = data.to_s
+    openai_url = "https://api.openai.com/v1/chat/completions"
+
+    payload = {
+      "model": "gpt-4-turbo-preview",
+      "messages": [
+        {
+          "role": "system",
+          "content": "you will receive a csv data, delete the columns and the rows that are empty and return the data clean without ading any comment or any other adicional messages, only the clean data, understood? btw, the headers are in the y axis so if there are a row without data delete that too. Thanks"
+        },
+        {
+          "role": "user",
+          "content": data
+        }
+      ],
+      "temperature": 1,
+      "max_tokens": 4096,
+      "top_p": 1,
+      "frequency_penalty": 0,
+      "presence_penalty": 0
+    }
+
+
+    response = RestClient.post(openai_url, payload.to_json, {content_type: "application/json", :Authorization => "Bearer #{key}"})
+    content = JSON.parse(response.body)&.dig("choices",0, "message", "content")
+    content = content.gsub(/^```json\s*|```$/, '')
+    eval(content).transpose
   end
 
   private

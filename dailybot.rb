@@ -60,26 +60,26 @@ class Dailybot
     # 3.- preguntar al usuario qué ticket trabajar
     # 4.- crear la carpeta
     #   4.1.- Esperar que el usuario cargue el archivo excel
-    #   4.2.- extraer la data del archivo excel
+    #   4.2.- extraer la data del archivo excel*
     #   4.3.- crear el csv formateado
     # 5.- enviar la data al agente chatgpt
-      
-
-      # estamos aquí
-      # en FileManager crear el mètodo get_template, ver como lo responde el asistente
-
     #   5.1.- usar la respuesta del agente para prepara el template
     #   5.2.- enviar el template al agente
     # 6.- crear el archivo en la ruta de centras de buk
+    
+    
+    # en FileManager crear el mètodo get_template, ver como lo responde el asistente ( done )
+    
+    # estamos aquí
+    # limpiar la data del csv
+    # parametrizar los nombres de paises
+    # crear todas las opciones de templates
+
+    # opcional
+    # parameterizar el nombre de la carpeta (tomar sólo el id del ticket)
 
 
     freshdesk.next_handler(gpt).next_handler(console_interaction).next_handler(file_manager).next_handler(gpt_agent).next_handler(file_manager)
     freshdesk.handle
-
-
-      # seleccionar template (template, extension, pais, nombre_contabilidad)
-      # generar data en generate_doc
-
-      
   end
 end

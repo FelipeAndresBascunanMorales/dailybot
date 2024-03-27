@@ -30,9 +30,9 @@ class FreshdeskHandler < AbstractHandler
   def handle
     # agent_id = 69000377606 #clau
 
-    date = (Date.today - 15).strftime("%Y-%m-%d")
+    date = (Date.today - 30).strftime("%Y-%m-%d")
     # %20OR%20status:3
-    query = "\"agent_id:#{@agent_id}%20AND%20status:2%20AND%20created_at:>%27#{date}%27\""
+    query = "\"agent_id:#{@agent_id}%20AND%20status:2%20OR%20status:3%20AND%20created_at:>%27#{date}%27\""
     api_path = "/api/v2/search/tickets?query=#{query}"
     fresh_url = "https://#{@@fresh_subdomain}.freshdesk.com/#{api_path}"
 

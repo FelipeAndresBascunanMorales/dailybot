@@ -83,7 +83,7 @@ class ChatgptConnection
 
   def generate_json_data(file_with_data)
     data = File.read(file_with_data)
-    return unless data.present?
+    return if data.nil?
     openai_url = "https://api.openai.com/v1/chat/completions"
     payload = {
       "model": "gpt-4-turbo-preview",

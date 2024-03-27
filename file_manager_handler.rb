@@ -6,6 +6,14 @@ class FileManagerHandler < AbstractHandler
   def initialize
     @Base_folder = '/home/felipe-buker/Documents/clientes'
   end
+
+  COUNTRIES = {
+    'CO' => 'Colombia',
+    'CL' => 'Chile',
+    'MX' => 'Mexico',
+    'PE' => 'Peru',
+    'BR' => 'Brasil',
+  }
   
   MSJ_DESCARGA = 'descargar archivo de levantamiento'
   MSJ_FOLDER = "descarga el archivo xlsx con el requerimiento en la siguiente ruta"
@@ -53,7 +61,6 @@ class FileManagerHandler < AbstractHandler
     files_in_folder = Dir.entries(@new_folder)
     xlsx_file = files_in_folder.select { |file| File.extname(file) == '.xlsx' }.first
 
-    
     while xlsx_file.nil?
       ConsoleHandler.print_folder(@new_folder, MSJ_FOLDER)
       files_in_folder = Dir.entries(@new_folder)
@@ -75,8 +82,10 @@ class FileManagerHandler < AbstractHandler
     requeriment_file.sheet(2).each do |r|
       detailed_data <<  r
     end
+    initial_data = clean_initial_data(initial_data[2..22])
+    detailed_data = clean_detailed_data(detailed_data)
     
-    @initial_data = initial_data[2..22].transpose
+    @initial_data = initial_data.transpose
     @detailed_data = detailed_data.transpose
     nil
   end
@@ -105,15 +114,48 @@ class FileManagerHandler < AbstractHandler
     end
     csv_file
   end
+
+  def clean_detailed_data(data)
+    start_in = nil
+
+    data.each.with_index do |d, index|
+      if d.include?("Detalle de centralización: Cuerpo")
+        start_in = index
+        break
+      end
+    end
+
+    if !start_in.nil? # tomamos sólo la data detalle
+      data[start_in..(start_in + 8)]
+    elsif "mejor_que_no"
+      # mmm no me da confianza, podría borrar data y desplazar todo, pero hay que probar
+      ChatgptHandler.clean_data(data.transpose, ENV["CHATGPT_API_KEY"])
+    else # tomamos todo lo que pueda ser útil
+      data.delete_if {|row| row[1..-1].all?(&:nil?)}
+      data.transpose.delete_if{|column| column[1..-1].all?(&:nil?)}.transpose
+    end
+  end
+
+  def clean_initial_data(data)
+    # data = ChatgptHandler.clean_data(data.transpose, ENV["CHATGPT_API_KEY"])
+    # if !data.nil?
+    #   data
+    # else # tomamos todo lo que pueda ser útil
+    #   data.delete_if {|row| row[1..-1].all?(&:nil?)}
+    #   data.transpose.delete_if{|column| column[1..-1].all?(&:nil?)}.transpose
+    # end
+    data.delete_if {|row| row[1..-1].all?(&:nil?)}
+    data.transpose.delete_if{|column| column[1..-1].all?(&:nil?)}.transpose
+  end
   
 
   def create_centra_file(data, country, name)
     puts "#{country} #{name}"
     paths = {
-      'peru' => ENV["PATH_CENTRAS_PERU"],
-      'chile' => ENV["PATH_CENTRAS_CHILE"],
-      'colombia' => ENV["PATH_CENTRAS_COLOMBIA"],
-      'mexico' => ENV["PATH_CENTRAS_MEXICO"],
+      'PE' => ENV["PATH_CENTRAS_PERU"],
+      'CL' => ENV["PATH_CENTRAS_CHILE"],
+      'CO' => ENV["PATH_CENTRAS_COLOMBIA"],
+      'MX' => ENV["PATH_CENTRAS_MEXICO"],
     }
 
     path = paths[country] || ENV["PATH_CENTRAS_CHILE"]
@@ -152,7 +194,7 @@ class FileManagerHandler < AbstractHandler
       separated_in_sheets: data['separated_in_sheets'],
     }
 
-    TEMPLATES[key].call(data['country'], data['company'])
+    TEMPLATES[key].call(COUNTRIES[data['country'].upcase], data['company_name'])
   end
 
   TEMPLATES = {
@@ -167,7 +209,7 @@ class FileManagerHandler < AbstractHandler
             
             #
             # clase para generar centralizacion contable personalizada para #{company}
-            class Exportador::Contabilidad::#{country}::Personalizadas::#{company} < Exportador::Contabilidad::#{country}::CentralizacionContable
+            class Exportador::Contabilidad::#{country}::Personalizadas::#{company.capitalize} < Exportador::Contabilidad::#{country}::CentralizacionContable
               def initialize
                 super()
                 @extension = 'xlsx'
@@ -217,7 +259,7 @@ class FileManagerHandler < AbstractHandler
                   
                   #
                   # clase para generar centralizacion contable personalizada para #{company}
-                  class Exportador::Contabilidad::#{country}::Personalizadas::#{company} < Exportador::Contabilidad::#{country}::CentralizacionContable
+                  class Exportador::Contabilidad::#{country}::Personalizadas::#{company.capitalize} < Exportador::Contabilidad::#{country}::CentralizacionContable
                     def initialize
                       super()
                       @extension = 'xlsx'

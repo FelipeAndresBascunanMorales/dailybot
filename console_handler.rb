@@ -1,7 +1,8 @@
 class ConsoleHandler < AbstractHandler
 
   def handle(request)
-    key, value = request.to_a.flatten
+    key, value = [request.keys.first, request.values.flatten]
+    # key, value = request.to_a.flatten
     case key
     when :ticket_summarized
       value = [value] unless value.is_a?(Array)
