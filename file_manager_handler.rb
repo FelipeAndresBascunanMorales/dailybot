@@ -7,6 +7,8 @@ class FileManagerHandler < AbstractHandler
     @Base_folder = '/home/felipe-buker/Documents/clientes'
   end
 
+  @@json_folder = '/home/felipe-buker/CosasDev/dailybot/examples/json_responses'
+
   COUNTRIES = {
     'CO' => 'Colombia',
     'CL' => 'Chile',
@@ -160,10 +162,15 @@ class FileManagerHandler < AbstractHandler
 
     path = paths[country] || ENV["PATH_CENTRAS_CHILE"]
     name = name || 'centra_ejemplo'
-    file_path = "#{path}#{name}.rb"
+    timestamp = Time.now.to_i
+    File.open("#{@@json_folder}/#{name}#{timestamp}.rb", 'w') do |file|
+      file.write(data)
+    end
+
+    timestamp = Time.now.to_i
+    file_path = "#{path}/#{name}.rb"
 
     if replace_file?(file_path)
-
       File.open(file_path, 'w') do |file|
         file.write(data)
       end
@@ -183,18 +190,28 @@ class FileManagerHandler < AbstractHandler
     end
   end
 
+  def self.save_json_file(data)
+    file_name = data["compania"] || 'sin_nombre'
+    timestamp = Time.now.to_i
+    File.open("#{@@json_folder}/#{file_name}#{timestamp}.json", 'w') do |file|
+      file.write(JSON.generate(data))
+    end
+  end
+
   def self.get_template(data)
     # format, country, grouped_data, separated_in_files = false, separated_in_sheets = false, headers = true
     
     key = {
       format: data['format'],
       # country: data['country'],
-      grouped_data: data['grouped_data'],
-      separated_in_files: data['separated_in_files'],
-      separated_in_sheets: data['separated_in_sheets'],
+      grouped_data: data['grouped_data'] || false,
+      separated_in_files: data['separated_in_files'] || false,
+      separated_in_sheets: data['separated_in_sheets'] || false,
     }
 
-    TEMPLATES[key].call(COUNTRIES[data['country'].upcase], data['company_name'])
+    binding.pry if TEMPLATES[key].nil?
+    p key
+    TEMPLATES[key]&.call(COUNTRIES[data['country'].upcase], data['company_name'])
   end
 
   TEMPLATES = {
@@ -248,55 +265,595 @@ class FileManagerHandler < AbstractHandler
            
           """
     },
-          {
-            format: 'xlsx',
-            grouped_data: nil,
-            separated_in_files: nil,
-            separated_in_sheets: nil,
-          } =>  -> (country, company) {
-            """
-                  # frozen_string_literal: true
-                  
-                  #
-                  # clase para generar centralizacion contable personalizada para #{company}
-                  class Exportador::Contabilidad::#{country}::Personalizadas::#{company.capitalize} < Exportador::Contabilidad::#{country}::CentralizacionContable
-                    def initialize
-                      super()
-                      @extension = 'xlsx'
-                    end
-                  
-                    CABECERA = [
-                      # COMPLETE HERE WITH CABECERA
-                    ].freeze
-                  
-                    def generate_doc(empresa, variable, obj_contabilidad)
-                      return unless obj_contabilidad.present?
-                  
-                      book = Exportador::BaseXlsx.crear_libro
-                      book.worksheets = []
-                      sheet = Exportador::BaseXlsx.crear_hoja book, empresa.nombre
-                      Exportador::BaseXlsx.autofit sheet, [CABECERA]
-                      Exportador::BaseXlsx.crear_encabezado(sheet, CABECERA, 0)
-                  
-                      date = Variable::Utils.end_of_period(variable.start_date, variable.period_type)
-                      date_ddmmyyyy = date.strftime('%d-%m-%Y')
-                  
-                      # COMPLETE HERE WITH DATA FROM EMPRESA OR VARIABLE TO BE USED IN THE ARRAY TO BE PRINTED
+    {
+      format: 'xlsx',
+      grouped_data: false,
+      separated_in_files: nil,
+      separated_in_sheets: nil,
+    } =>  -> (country, company) {
+      """
+        # frozen_string_literal: true
+        
+        #
+        # clase para generar centralizacion contable personalizada para #{company}
+        class Exportador::Contabilidad::#{country}::Personalizadas::#{company.capitalize} < Exportador::Contabilidad::#{country}::CentralizacionContable
+          def initialize
+            super()
+            @extension = 'xlsx'
+          end
+        
+          CABECERA = [
+            # COMPLETE HERE WITH CABECERA
+          ].freeze
+        
+          def generate_doc(empresa, variable, obj_contabilidad)
+            return unless obj_contabilidad.present?
+        
+            book = Exportador::BaseXlsx.crear_libro
+            book.worksheets = []
+            sheet = Exportador::BaseXlsx.crear_hoja book, empresa.nombre
+            Exportador::BaseXlsx.autofit sheet, [CABECERA]
+            Exportador::BaseXlsx.crear_encabezado(sheet, CABECERA, 0)
+        
+            date = Variable::Utils.end_of_period(variable.start_date, variable.period_type)
+            date_ddmmyyyy = date.strftime('%d-%m-%Y')
+        
+            # COMPLETE HERE WITH DATA FROM EMPRESA OR VARIABLE TO BE USED IN THE ARRAY TO BE PRINTED
 
-                      data = obj_contabilidad.lazy.map do |l|
-                        [
-                          
-                          # COMPLETE HERE WITH DATA TO BE PRINTED
+            data = obj_contabilidad.lazy.map do |l|
+              [
+                
+                # COMPLETE HERE WITH DATA TO BE PRINTED
 
-                        ]
-                      end
-                  
-                      Exportador::BaseXlsx.escribir_celdas sheet, data, offset: 1, number_format: '#,##0'
-                      Exportador::BaseXlsx.cerrar_libro(book).contenido
-                    end
-                  end
-                """
-          }
+              ]
+            end
+        
+            Exportador::BaseXlsx.escribir_celdas sheet, data, offset: 1, number_format: '#,##0'
+            Exportador::BaseXlsx.cerrar_libro(book).contenido
+          end
+        end
+      """
+    },
+    {
+      format: 'txt',
+      grouped_data: false,
+      separated_in_files: false,
+      separated_in_sheets: false,
+    } => -> (country, company) {
+      """
+        # frozen_string_literal: true
+
+        #
+        # clase para generar centralizacion contable personalizada para #{company}
+        class Exportador::Contabilidad::#{country}::Personalizadas::#{company.capitalize} < Exportador::Contabilidad::#{country}::CentralizacionContable
+          require 'csv'
+          def initialize
+            super()
+            @extension = 'txt'
+          end
+
+          CABECERA =
+            [
+              # COMPLETE HERE WITH CABECERA
+            ].freeze
+
+          def generate_doc(empresa, variable, obj_contabilidad)
+            return unless obj_contabilidad.present?
+
+            # COMPLETE HERE VARIABLES
+            # THIS MUST BE DATA FROM EMPRESA OR VARIABLE TO BE USED IN THE ARRAY TO BE PRINTED
+            # date = Variable::Utils.end_of_period(variable.start_date, variable.period_type)
+
+            CSV.generate(col_sep: ';') do |csv|
+              csv << CABECERA
+              obj_contabilidad.each do |l|
+                csv << [
+
+                  # COMPLETE HERE WITH DATA TO BE PRINTED
+
+                ]
+              end
+            end
+          end
+        end
+
+        # COMPLETE HERE METHODS
+      """
+    },
+    {
+      format: 'txt',
+      grouped_data: true,
+      separated_in_files: false,
+      separated_in_sheets: false,
+    } => -> (country, company) {
+      """
+        # frozen_string_literal: true
+
+        #
+        # clase para generar centralizacion contable personalizada para #{company}
+        class Exportador::Contabilidad::#{country}::Personalizadas::#{company.capitalize} < Exportador::Contabilidad::#{country}::CentralizacionContable
+          require 'csv'
+          def initialize
+            super()
+            @extension = 'txt'
+          end
+
+          CABECERA =
+            [
+              # COMPLETE HERE WITH CABECERA
+            ].freeze
+
+          def generate_doc(empresa, variable, obj_contabilidad)
+            return unless obj_contabilidad.present?
+
+            # COMPLETE HERE VARIABLES
+            # THIS MUST BE DATA FROM EMPRESA OR VARIABLE TO BE USED IN THE ARRAY TO BE PRINTED
+            # date = Variable::Utils.end_of_period(variable.start_date, variable.period_type)
+
+            obj_contabilidad = obj_contabilidad.group_by do |l|
+              {
+        
+                # COMPLETE HERE GROUP_BY
+
+                # EXAMPLES:
+                # cuenta_contable: l.cuenta_contable,
+                # lado: l.deber_o_haber,
+                # centro_costos: l.centro_costo,
+                # glosa: l.glosa,
+              }
+            end
+        
+
+            CSV.generate(col_sep: ';') do |csv|
+              csv << CABECERA
+              obj_contabilidad.each do |k, v|
+                csv << [
+
+                # COMPLETE HERE DATA TO BE PRINTED
+              
+                # EXAMPLES
+                # date_ddmmyyyy,
+                # k[:nombre],
+                # k[:cuenta_contable],
+                # k[:lado] == 'C' ? v.sum(&:monto) : nil,
+                # k[:lado] == 'D' ? v.sum(&:monto) : nil,
+                # k[:centro_costos],
+                # k[:glosa],
+                ]
+              end
+            end
+          end
+        end
+      """
+    },
+    {
+      format: 'txt',
+      grouped_data: false,
+      separated_in_files: nil,
+      separated_in_sheets: nil,
+    } => -> (country, company) {
+      """
+        # frozen_string_literal: true
+
+        #
+        # clase para generar centralizacion contable personalizada para #{company}
+        class Exportador::Contabilidad::#{country}::Personalizadas::#{company.capitalize} < Exportador::Contabilidad::#{country}::CentralizacionContable
+          require 'csv'
+          def initialize
+            super()
+            @extension = 'txt'
+          end
+
+          CABECERA =
+            [
+              # COMPLETE HERE WITH CABECERA
+            ].freeze
+
+          def generate_doc(empresa, variable, obj_contabilidad)
+            return unless obj_contabilidad.present?
+
+            # COMPLETE HERE VARIABLES
+            # THIS MUST BE DATA FROM EMPRESA OR VARIABLE TO BE USED IN THE ARRAY TO BE PRINTED
+            # date = Variable::Utils.end_of_period(variable.start_date, variable.period_type)
+
+            CSV.generate(col_sep: ';') do |csv|
+              csv << CABECERA
+              obj_contabilidad.each do |l|
+                csv << [
+
+                  # COMPLETE HERE WITH DATA TO BE PRINTED
+
+                ]
+              end
+            end
+          end
+        end
+
+        # COMPLETE HERE METHODS
+      """
+    },
+    {
+      format: 'txt',
+      grouped_data: true,
+      separated_in_files: nil,
+      separated_in_sheets: nil,
+    } => -> (country, company) {
+      """
+        # frozen_string_literal: true
+
+        #
+        # clase para generar centralizacion contable personalizada para #{company}
+        class Exportador::Contabilidad::#{country}::Personalizadas::#{company.capitalize} < Exportador::Contabilidad::#{country}::CentralizacionContable
+          require 'csv'
+          def initialize
+            super()
+            @extension = 'txt'
+          end
+
+          CABECERA =
+            [
+              # COMPLETE HERE WITH CABECERA
+            ].freeze
+
+          def generate_doc(empresa, variable, obj_contabilidad)
+            return unless obj_contabilidad.present?
+
+            # COMPLETE HERE VARIABLES
+            # THIS MUST BE DATA FROM EMPRESA OR VARIABLE TO BE USED IN THE ARRAY TO BE PRINTED
+            # date = Variable::Utils.end_of_period(variable.start_date, variable.period_type)
+
+            obj_contabilidad = obj_contabilidad.group_by do |l|
+              {
+        
+                # COMPLETE HERE GROUP_BY
+
+                # EXAMPLES:
+                # cuenta_contable: l.cuenta_contable,
+                # lado: l.deber_o_haber,
+                # centro_costos: l.centro_costo,
+                # glosa: l.glosa,
+              }
+            end
+        
+
+            CSV.generate(col_sep: ';') do |csv|
+              csv << CABECERA
+              obj_contabilidad.each do |k, v|
+                csv << [
+
+                # COMPLETE HERE DATA TO BE PRINTED
+              
+                # EXAMPLES
+                # date_ddmmyyyy,
+                # k[:nombre],
+                # k[:cuenta_contable],
+                # k[:lado] == 'C' ? v.sum(&:monto) : nil,
+                # k[:lado] == 'D' ? v.sum(&:monto) : nil,
+                # k[:centro_costos],
+                # k[:glosa],
+                ]
+              end
+            end
+          end
+        end
+      """
+    },
+    {
+      format: 'txt',
+      grouped_data: nil,
+      separated_in_files: nil,
+      separated_in_sheets: nil,
+    } => -> (country, company) {
+      """
+        # frozen_string_literal: true
+
+        #
+        # clase para generar centralizacion contable personalizada para #{company}
+        class Exportador::Contabilidad::#{country}::Personalizadas::#{company.capitalize} < Exportador::Contabilidad::#{country}::CentralizacionContable
+          require 'csv'
+          def initialize
+            super()
+            @extension = 'txt'
+          end
+
+          CABECERA =
+            [
+              # COMPLETE HERE WITH CABECERA
+            ].freeze
+
+          def generate_doc(empresa, variable, obj_contabilidad)
+            return unless obj_contabilidad.present?
+
+            # COMPLETE HERE VARIABLES
+            # THIS MUST BE DATA FROM EMPRESA OR VARIABLE TO BE USED IN THE ARRAY TO BE PRINTED
+            # date = Variable::Utils.end_of_period(variable.start_date, variable.period_type)
+
+            CSV.generate(col_sep: ';') do |csv|
+              csv << CABECERA
+              obj_contabilidad.each do |l|
+                csv << [
+
+                  # COMPLETE HERE WITH DATA TO BE PRINTED
+
+                ]
+              end
+            end
+          end
+        end
+
+        # COMPLETE HERE METHODS
+      """
+    },
+    {
+      format: 'csv',
+      grouped_data: false,
+      separated_in_files: false,
+      separated_in_sheets: false,
+    } => -> (country, company) {
+      """
+        # frozen_string_literal: true
+
+        #
+        # clase para generar centralizacion contable personalizada para #{company}
+        class Exportador::Contabilidad::#{country}::Personalizadas::#{company.capitalize} < Exportador::Contabilidad::#{country}::CentralizacionContable
+          require 'csv'
+          def initialize
+            super()
+            @extension = 'csv'
+          end
+
+          CABECERA =
+            [
+              # COMPLETE HERE WITH CABECERA
+            ].freeze
+
+          def generate_doc(empresa, variable, obj_contabilidad)
+            return unless obj_contabilidad.present?
+
+            # COMPLETE HERE VARIABLES
+            # THIS MUST BE DATA FROM EMPRESA OR VARIABLE TO BE USED IN THE ARRAY TO BE PRINTED
+            # date = Variable::Utils.end_of_period(variable.start_date, variable.period_type)
+
+            CSV.generate(col_sep: ';') do |csv|
+              csv << CABECERA
+              obj_contabilidad.each do |l|
+                csv << [
+
+                  # COMPLETE HERE WITH DATA TO BE PRINTED
+
+                ]
+              end
+            end
+          end
+        end
+
+        # COMPLETE HERE METHODS
+      """
+    },
+    {
+      format: 'csv',
+      grouped_data: true,
+      separated_in_files: false,
+      separated_in_sheets: false,
+    } => -> (country, company) {
+      """
+        # frozen_string_literal: true
+
+        #
+        # clase para generar centralizacion contable personalizada para #{company}
+        class Exportador::Contabilidad::#{country}::Personalizadas::#{company.capitalize} < Exportador::Contabilidad::#{country}::CentralizacionContable
+          require 'csv'
+          def initialize
+            super()
+            @extension = 'csv'
+          end
+
+          CABECERA =
+            [
+              # COMPLETE HERE WITH CABECERA
+            ].freeze
+
+          def generate_doc(empresa, variable, obj_contabilidad)
+            return unless obj_contabilidad.present?
+
+            # COMPLETE HERE VARIABLES
+            # THIS MUST BE DATA FROM EMPRESA OR VARIABLE TO BE USED IN THE ARRAY TO BE PRINTED
+            # date = Variable::Utils.end_of_period(variable.start_date, variable.period_type)
+
+            obj_contabilidad = obj_contabilidad.group_by do |l|
+              {
+        
+                # COMPLETE HERE GROUP_BY
+
+                # EXAMPLES:
+                # cuenta_contable: l.cuenta_contable,
+                # lado: l.deber_o_haber,
+                # centro_costos: l.centro_costo,
+                # glosa: l.glosa,
+              }
+            end
+        
+
+            CSV.generate(col_sep: ';') do |csv|
+              csv << CABECERA
+              obj_contabilidad.each do |k, v|
+                csv << [
+
+                # COMPLETE HERE DATA TO BE PRINTED
+              
+                # EXAMPLES
+                # date_ddmmyyyy,
+                # k[:nombre],
+                # k[:cuenta_contable],
+                # k[:lado] == 'C' ? v.sum(&:monto) : nil,
+                # k[:lado] == 'D' ? v.sum(&:monto) : nil,
+                # k[:centro_costos],
+                # k[:glosa],
+                ]
+              end
+            end
+          end
+        end
+      """
+    },
+    {
+      format: 'csv',
+      grouped_data: false,
+      separated_in_files: nil,
+      separated_in_sheets: nil,
+    } => -> (country, company) {
+      """
+        # frozen_string_literal: true
+
+        #
+        # clase para generar centralizacion contable personalizada para #{company}
+        class Exportador::Contabilidad::#{country}::Personalizadas::#{company.capitalize} < Exportador::Contabilidad::#{country}::CentralizacionContable
+          require 'csv'
+          def initialize
+            super()
+            @extension = 'csv'
+          end
+
+          CABECERA =
+            [
+              # COMPLETE HERE WITH CABECERA
+            ].freeze
+
+          def generate_doc(empresa, variable, obj_contabilidad)
+            return unless obj_contabilidad.present?
+
+            # COMPLETE HERE VARIABLES
+            # THIS MUST BE DATA FROM EMPRESA OR VARIABLE TO BE USED IN THE ARRAY TO BE PRINTED
+            # date = Variable::Utils.end_of_period(variable.start_date, variable.period_type)
+
+            CSV.generate(col_sep: ';') do |csv|
+              csv << CABECERA
+              obj_contabilidad.each do |l|
+                csv << [
+
+                  # COMPLETE HERE WITH DATA TO BE PRINTED
+
+                ]
+              end
+            end
+          end
+        end
+
+        # COMPLETE HERE METHODS
+      """
+    },
+    {
+      format: 'csv',
+      grouped_data: true,
+      separated_in_files: nil,
+      separated_in_sheets: nil,
+    } => -> (country, company) {
+      """
+        # frozen_string_literal: true
+
+        #
+        # clase para generar centralizacion contable personalizada para #{company}
+        class Exportador::Contabilidad::#{country}::Personalizadas::#{company.capitalize} < Exportador::Contabilidad::#{country}::CentralizacionContable
+          require 'csv'
+          def initialize
+            super()
+            @extension = 'csv'
+          end
+
+          CABECERA =
+            [
+              # COMPLETE HERE WITH CABECERA
+            ].freeze
+
+          def generate_doc(empresa, variable, obj_contabilidad)
+            return unless obj_contabilidad.present?
+
+            # COMPLETE HERE VARIABLES
+            # THIS MUST BE DATA FROM EMPRESA OR VARIABLE TO BE USED IN THE ARRAY TO BE PRINTED
+            # date = Variable::Utils.end_of_period(variable.start_date, variable.period_type)
+
+            obj_contabilidad = obj_contabilidad.group_by do |l|
+              {
+        
+                # COMPLETE HERE GROUP_BY
+
+                # EXAMPLES:
+                # cuenta_contable: l.cuenta_contable,
+                # lado: l.deber_o_haber,
+                # centro_costos: l.centro_costo,
+                # glosa: l.glosa,
+              }
+            end
+        
+
+            CSV.generate(col_sep: ';') do |csv|
+              csv << CABECERA
+              obj_contabilidad.each do |k, v|
+                csv << [
+
+                # COMPLETE HERE DATA TO BE PRINTED
+              
+                # EXAMPLES
+                # date_ddmmyyyy,
+                # k[:nombre],
+                # k[:cuenta_contable],
+                # k[:lado] == 'C' ? v.sum(&:monto) : nil,
+                # k[:lado] == 'D' ? v.sum(&:monto) : nil,
+                # k[:centro_costos],
+                # k[:glosa],
+                ]
+              end
+            end
+          end
+        end
+      """
+    },
+    {
+      format: 'csv',
+      grouped_data: nil,
+      separated_in_files: nil,
+      separated_in_sheets: nil,
+    } => -> (country, company) {
+      """
+        # frozen_string_literal: true
+
+        #
+        # clase para generar centralizacion contable personalizada para #{company}
+        class Exportador::Contabilidad::#{country}::Personalizadas::#{company.capitalize} < Exportador::Contabilidad::#{country}::CentralizacionContable
+          require 'csv'
+          def initialize
+            super()
+            @extension = 'csv'
+          end
+
+          CABECERA =
+            [
+              # COMPLETE HERE WITH CABECERA
+            ].freeze
+
+          def generate_doc(empresa, variable, obj_contabilidad)
+            return unless obj_contabilidad.present?
+
+            # COMPLETE HERE VARIABLES
+            # THIS MUST BE DATA FROM EMPRESA OR VARIABLE TO BE USED IN THE ARRAY TO BE PRINTED
+            # date = Variable::Utils.end_of_period(variable.start_date, variable.period_type)
+
+            CSV.generate(col_sep: ';') do |csv|
+              csv << CABECERA
+              obj_contabilidad.each do |l|
+                csv << [
+
+                  # COMPLETE HERE WITH DATA TO BE PRINTED
+
+                ]
+              end
+            end
+          end
+        end
+
+        # COMPLETE HERE METHODS
+      """
+    }
   }
 
 end

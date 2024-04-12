@@ -27,6 +27,8 @@ class ChatgptHandler < AbstractHandler
       json_data = generate_json_data(val)
       #create_assistant() ... was created in the playground
       
+      FileManagerHandler.save_json_file(json_data)
+      
       puts "activando asistente"
       thread = create_thread
       add_message(thread['id'], json_data) # first message, the agent must response with the function to call te template

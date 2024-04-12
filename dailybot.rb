@@ -48,7 +48,14 @@ class Dailybot
   autoload :ConsoleHandler, 'console_handler'
 
   def looking_what_is_new
-    freshdesk = FreshdeskHandler.new(ENV["FRESH_API_KEY"])
+    agent_id = {
+      benja: 69053233224,
+      kriss: 69038275714,
+      clau: 69000377606,
+      felipe: 69016003139,
+    }
+
+    freshdesk = FreshdeskHandler.new(ENV["FRESH_API_KEY"], agent_id: agent_id[:benja])
     gpt = ChatgptHandler.new(ENV["CHATGPT_API_KEY"])
     file_manager = FileManagerHandler.new
     console_interaction = ConsoleHandler.new
@@ -69,12 +76,12 @@ class Dailybot
     
     
     # en FileManager crear el mètodo get_template, ver como lo responde el asistente ( done )
-    
     # estamos aquí
     # limpiar la data del csv
     # parametrizar los nombres de paises
     # crear todas las opciones de templates
-
+    
+    
     # opcional
     # parameterizar el nombre de la carpeta (tomar sólo el id del ticket)
 

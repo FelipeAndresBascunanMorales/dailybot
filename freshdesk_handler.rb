@@ -20,6 +20,10 @@ class FreshdeskHandler < AbstractHandler
     Pending: 3,
     Resolved: 4,
     Closed: 5,
+    esperando_cliente: 6,
+    esperando_aprobacion: 20,
+    esperando_deploy: 28,
+    en_curso: 13,
   }
 
   def initialize(api_key, agent_id: 69016003139)
@@ -28,18 +32,24 @@ class FreshdeskHandler < AbstractHandler
   end
   
   def handle
-    # agent_id = 69000377606 #clau
-
-    date = (Date.today - 30).strftime("%Y-%m-%d")
+    date = (Date.today - 20).strftime("%Y-%m-%d")
     # %20OR%20status:3
-    query = "\"agent_id:#{@agent_id}%20AND%20status:2%20OR%20status:3%20AND%20created_at:>%27#{date}%27\""
+    # query = "\"agent_id:#{@agent_id}%20AND%20status:2%20OR%20status:3%20OR%20status:28%20OR%20status:20%20AND%20created_at:>%27#{date}%27\""
+    # query = "\"agent_id:#{@agent_id}%20AND%20created_at:>%27#{date}%27\""
+    # %20OR%20status:3%20OR%20status:28%20OR%20status:20
+    query = "\"agent_id:#{@agent_id}%20AND%20status:28%20AND%20created_at:>%27#{date}%27\""
     api_path = "/api/v2/search/tickets?query=#{query}"
     fresh_url = "https://#{@@fresh_subdomain}.freshdesk.com/#{api_path}"
 
+
+    # fresh_url = "https://buk.freshdesk.com/api/v2/tickets?updated_since=#{date}"
     site = RestClient::Resource.new(fresh_url, @api_key, 'X')
 
     begin
       response = site.get(:accept => 'application/json')
+
+      # cambia cuando se obtiene la data desde un filtro o desde un endpoint directo
+      # data = JSON.parse(response.body)
       data = JSON.parse(response.body)['results']
 
       super({fresh_data: data})
